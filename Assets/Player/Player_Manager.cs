@@ -1,49 +1,45 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
 using TCP;
 using UnityEngine;
 
 public class Player_Manager : MonoBehaviour
 {
-    public int Serial_N;
+    public static Player_Manager instance;
+    public static Dictionary<int, Player> players = new Dictionary<int, Player>();
 
-    private void FixedUpdate()
+    public GameObject localPlayerPrefab;
+    public GameObject otherplayerPrefab;
+    private void Awake()
     {
-        if(Input.GetKey(KeyCode.W))
+        if (instance == null)
         {
-            SendInputToServer();
+            instance = this;
         }
-        if (Input.GetKey(KeyCode.S))
+        else if (instance != this)
         {
-            SendInputToServer();
+            Debug.Log("Instance already exists, destroying object!");
+            Destroy(this);
         }
-        if (Input.GetKey(KeyCode.A))
-        {
-            SendInputToServer();
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            SendInputToServer();
-        }
+        TCPClient.m_Player.Player_Init_SendMessage();
     }
 
-    private void SendInputToServer()
+
+    public void SpawnPlayer(int _id, Vector3 _position, Quaternion _rotation)
     {
-        bool[] _inputs = new bool[]
+        Debug.Log("SpawnPlayer");
+        GameObject _player;
+        if (TCPClient.m_Player.my_id == _id)
         {
-            Input.GetKey(KeyCode.W),
-            Input.GetKey(KeyCode.S),
-            Input.GetKey(KeyCode.A),
-            Input.GetKey(KeyCode.D),
-        };
-
-        PlayerMovement(_inputs);
-    }
-
-    public void PlayerMovement(bool[] _inputs)
-    {
-       
-        TCPClient.m_Player.Player_MoveMent(_inputs, Serial_N);
+            Debug.Log("SAME");
+            _player = Instantiate(localPlayerPrefab, _position, _rotation);
+        }
+        else
+        {
+            Debug.Log("OTHER");
+            _player = Instantiate(otherplayerPrefab, _position, _rotation);
+        }
+        _player.GetComponent<Player>().Serial_N = _id;
+        players.Add(_id, _player.GetComponent<Player>());
     }
 
 }

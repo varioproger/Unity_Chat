@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public Player_Manager player;
+    public Player player;
     public float sensitivity = 100f;
     public float clampAngle = 85f;
 
@@ -19,7 +19,7 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        Look();
+        //Look();
         Debug.DrawRay(transform.position, transform.forward * 2, Color.red);
     }
 

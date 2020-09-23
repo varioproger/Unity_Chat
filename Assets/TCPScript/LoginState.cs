@@ -22,7 +22,6 @@ public class LoginState : State
 
     Login m_login;
     Register_Manager m_register;
-    public int id;
     SUBSTATE m_SubState;
 
     byte[] PackingData(string _id, string _pw)
@@ -145,7 +144,8 @@ public class LoginState : State
         switch((PROTOCOL)Protocol)
         {
             case PROTOCOL.JOIN_RESULT:
-                UnPackingData(TCPClient.Instance.UnPackingData(), out result, out msg);
+                UnPackingData(TCPClient.Instance.UnPackingData(), out result, out msg);//이부분 수정해야함. data.offset += sizeof(int);
+
                 if (result == (int)RESULT.JOIN_SUCCESS)
                 {
                     print("ok");
@@ -170,9 +170,8 @@ public class LoginState : State
                     print("ok");
                     //이 부분 수정
                     UnPackingData(buffer, out num, out msg);
-                    id = num;
+                    TCPClient.m_Player.my_id = num;
                     SceneManager.LoadScene("Lobby_Scene");
-                    //TCPClient.Instance.SetState(TCPClient);
                 }
                 else
                 {

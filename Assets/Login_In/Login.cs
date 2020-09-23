@@ -13,12 +13,6 @@ public class Login : MonoBehaviour
     public string result_str;
     public bool okay = false;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
     private void Update()
     {
         if(result_str.Length!=0)

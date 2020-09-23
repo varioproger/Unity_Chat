@@ -6,7 +6,7 @@ using UnityEngine;
 public class PlayerState : State
 {
     public int my_id;
-    void UnPackingData(RecvBuffer buffer, out int id, out int serial, out Vector3 position, out Quaternion rotation)
+    void UnPackingData(RecvBuffer buffer, out int id, out Vector3 position, out Quaternion rotation)
     {
 
         Debug.Log("UNPACKINHGG");
@@ -15,11 +15,6 @@ public class PlayerState : State
 
         id = BitConverter.ToInt32(data.buffer, data.offset);
         data.offset += sizeof(int);
-
-        ////serial
-        serial = BitConverter.ToInt32(data.buffer, data.offset);
-        data.offset += sizeof(int);
-        //Debug.Log(string.Format("temp = {0:x}", serial));
 
         position.x = BitConverter.ToSingle(data.buffer, data.offset);
         data.offset += sizeof(float);
@@ -140,59 +135,54 @@ public class PlayerState : State
     {
         UInt64 Protocol = (UInt64)CLASS_STATE.PLAYER_STATE | (UInt64)STATE.MOVEMENT;
         Debug.Log(string.Format("temp = {0:x}", Protocol));
-        Debug.Log($"TCPClient.Instance.myId = {TCPClient.m_Login.id}");
+        Debug.Log($"TCPClient.Instance.myId = {TCPClient.m_Player.my_id}");
         Debug.Log($"serial = {serial}");
-        TCPClient.Instance.PackingData(Protocol, PackingData(_inputs, GameManager.players[TCPClient.m_Login.id].transform.rotation));
+        TCPClient.Instance.PackingData(Protocol, PackingData(_inputs, Player_Manager.players[TCPClient.m_Player.my_id].transform.rotation));
     }
     public bool Player_Init_SendMessage()
     {
         UInt64 Protocol = (UInt64)CLASS_STATE.PLAYER_STATE | (UInt64)STATE.ONLINE;
-        Debug.Log(string.Format("temp = {0:x}", Protocol));
+        Debug.Log(string.Format("Player_Init_SendMessage = {0:x}", Protocol));
         TCPClient.Instance.PackingData(Protocol);
         return true;
     }
     public static void PlayerPosition(int serial,Vector3 _position)
     {
-        GameManager.players[serial].transform.position = _position;
+        Player_Manager.players[serial].transform.position = _position;
     }
 
     public static void PlayerRotation(int serial,Quaternion _rotation)
     {
-        GameManager.players[serial].transform.rotation = _rotation;
+        Player_Manager.players[serial].transform.rotation = _rotation;
     }
     public override void RecvProcess()
     {
         UInt64 Protocol = TCPClient.Instance.GetProtocol() & (UInt64)FULL_CODE.PROTOCOL;
         Debug.Log(string.Format("temp = {0:x}", Protocol));
         int id;
-        int serial;
         Vector3 position=Vector3.zero;
         Quaternion rotation = Quaternion.identity ;
-
 
         switch ((PROTOCOL)Protocol)
         {
             case PROTOCOL.SPAWN:
                 Debug.Log("SPAWN");
-                UnPackingData(TCPClient.Instance.UnPackingData(), out id, out  serial, out position, out rotation);
+                UnPackingData(TCPClient.Instance.UnPackingData(), out id, out position, out rotation);
                 Debug.Log(string.Format("id = {0:x}", id));
-                Debug.Log(string.Format("serial spawn = {0:x}", serial));
-
-                GameManager.instance.SpawnPlayer(id, serial, position, rotation);
+                Player_Manager.instance.SpawnPlayer(id, position, rotation);
                 break;
             case PROTOCOL.ROTATION:
                 Debug.Log("ROTATION");
-                UnPackingData(TCPClient.Instance.UnPackingData(), out serial, out rotation);
-                Debug.Log(string.Format("serial Rotation = {0:x}", serial));
-                PlayerRotation(serial, rotation);
+                UnPackingData(TCPClient.Instance.UnPackingData(), out id, out rotation);
+                Debug.Log(string.Format("serial Rotation = {0:x}", id));
+                PlayerRotation(id, rotation);
                 break;
             case PROTOCOL.POSITION:
                 Debug.Log("POSITION");
-                UnPackingData(TCPClient.Instance.UnPackingData(), out serial, out position);
-                Debug.Log(string.Format("serial Position = {0:x}", serial));
-                PlayerPosition(serial, position);
-                break;
-            
+                UnPackingData(TCPClient.Instance.UnPackingData(), out id, out position);
+                Debug.Log(string.Format("serial Position = {0:x}", id));
+                PlayerPosition(id, position);
+                break;            
         }
     }
 }

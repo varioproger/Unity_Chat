@@ -394,10 +394,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 1415192051}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a73f1520de7de624cb3bd64e1ef9f870, type: 3}
+  m_Script: {fileID: 11500000, guid: e3974a4a4eca2ef419ed301a46957cb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Game_Manager_PF: {fileID: 2393630431280849591, guid: 4c5e2f9e489e87342b00bb5a5288f851,
+    type: 3}
+  Room_Num: 0
+  okay: 0
+  result: 
   text: {fileID: 1993667205}
+  next_Scene: 0
 --- !u!4 &1415192053
 Transform:
   m_ObjectHideFlags: 0

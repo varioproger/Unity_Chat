@@ -66,7 +66,7 @@ public class LobbyState : State
                 {
                     case LOBBY_RESULT.NOT_READY:
                         UnPackingData(buffer, out room_num, out msg);
-                        Game_Manager.instance.room_number = room_num;
+                        Game_Manager.room_number = room_num;
                         m_Lobby.result = msg;
                         m_Lobby.okay = true;
                         break;

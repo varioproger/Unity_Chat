@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Collections;
 using TCP;
 using UnityEngine;
 
@@ -8,26 +7,18 @@ public class Player : MonoBehaviour
     //한 개정의 여러 캐릭터가 있을 경우. 추가 하지 않았음.
     public int Serial_N;
 
-    private void FixedUpdate()
+    private void Start()
     {
-        if(Input.GetKey(KeyCode.W))
+        StartCoroutine("Movement");
+    }
+    IEnumerator Movement()
+    {
+        while (true)
         {
             SendInputToServer();
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            SendInputToServer();
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            SendInputToServer();
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            SendInputToServer();
+            yield return new WaitForSeconds(0.1f);
         }
     }
-
     private void SendInputToServer()
     {
         bool[] _inputs = new bool[]

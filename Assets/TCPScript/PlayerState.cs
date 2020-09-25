@@ -94,6 +94,22 @@ public class PlayerState : State
         rotation.z = BitConverter.ToSingle(data.buffer, data.offset);
         Debug.Log(rotation.z);
     }
+
+    void UnPackingData(RecvBuffer buffer, out int serial, out float y, out float x)
+    {
+
+        RecvBuffer data = buffer;
+        data.offset = sizeof(UInt64);
+
+        ////serial
+        serial = BitConverter.ToInt32(data.buffer, data.offset);
+        data.offset += sizeof(int);
+
+        y = BitConverter.ToSingle(data.buffer, data.offset);
+        data.offset += sizeof(float);
+
+        x = BitConverter.ToSingle(data.buffer, data.offset);
+    }
     byte[] PackingData(bool[] _inputs, Quaternion rotation)
     {
 
@@ -131,9 +147,42 @@ public class PlayerState : State
         return data.buffer;
     }
 
+
+    byte[] PackingData(float verticalRotation , float horizontalRotation)
+    {
+
+        int size = sizeof(float) * 2;
+        SendBuffer data = new SendBuffer();
+        data.buffer = new byte[size];
+        data.size = 0;
+        data.offset = 0;
+
+        Buffer.BlockCopy(BitConverter.GetBytes(verticalRotation), 0, data.buffer, data.offset, sizeof(float));
+        data.size += sizeof(float);
+        data.offset += sizeof(float);
+
+        Buffer.BlockCopy(BitConverter.GetBytes(horizontalRotation), 0, data.buffer, data.offset, sizeof(float));
+        data.size += sizeof(float);
+
+        return data.buffer;
+    }
+
+    public void PlayerInitRotation(float verticalRotation, float horizontalRotation)
+    {
+        UInt64 Protocol = (UInt64)CLASS_STATE.PLAYER_STATE | (UInt64)STATE.MOVEMENT | (UInt64)PROTOCOL.INITROTATION;
+
+        TCPClient.Instance.PackingData(Protocol, PackingData(verticalRotation, horizontalRotation));
+    }
+    public void PlayerRotationCheck(float Mouse_Y, float Mouse_X)
+    {
+        Debug.Log("PlayerRotationCheck");
+        UInt64 Protocol = (UInt64)CLASS_STATE.PLAYER_STATE | (UInt64)STATE.MOVEMENT | (UInt64)PROTOCOL.ROTATION;
+
+        TCPClient.Instance.PackingData(Protocol, PackingData(Mouse_Y, Mouse_X));
+    }
     public void Player_MoveMent(bool[] _inputs, int serial)
     {
-        UInt64 Protocol = (UInt64)CLASS_STATE.PLAYER_STATE | (UInt64)STATE.MOVEMENT;
+        UInt64 Protocol = (UInt64)CLASS_STATE.PLAYER_STATE | (UInt64)STATE.MOVEMENT | (UInt64)PROTOCOL.POSITION;
         Debug.Log(string.Format("temp = {0:x}", Protocol));
         Debug.Log($"TCPClient.Instance.myId = {TCPClient.m_Player.my_id}");
         Debug.Log($"serial = {serial}");
@@ -155,6 +204,12 @@ public class PlayerState : State
     {
         Player_Manager.players[serial].transform.rotation = _rotation;
     }
+
+    public static void PlayerRotation(int serial, float verticalRotation, float horizontalRotation)
+    {
+        Player_Manager.players[serial].transform.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
+        Player_Manager.players[serial].transform.rotation = Quaternion.Euler(0f, horizontalRotation, 0f);
+    }
     public override void RecvProcess()
     {
         UInt64 Protocol = TCPClient.Instance.GetProtocol() & (UInt64)FULL_CODE.PROTOCOL;
@@ -162,7 +217,8 @@ public class PlayerState : State
         int id;
         Vector3 position=Vector3.zero;
         Quaternion rotation = Quaternion.identity ;
-
+        float x = 0.0f;
+        float y = 0.0f;
         switch ((PROTOCOL)Protocol)
         {
             case PROTOCOL.SPAWN:
@@ -173,9 +229,9 @@ public class PlayerState : State
                 break;
             case PROTOCOL.ROTATION:
                 Debug.Log("ROTATION");
-                UnPackingData(TCPClient.Instance.UnPackingData(), out id, out rotation);
+                UnPackingData(TCPClient.Instance.UnPackingData(), out id, out y, out x);
                 Debug.Log(string.Format("serial Rotation = {0:x}", id));
-                PlayerRotation(id, rotation);
+                PlayerRotation(id, y, x);
                 break;
             case PROTOCOL.POSITION:
                 Debug.Log("POSITION");

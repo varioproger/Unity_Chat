@@ -1,6 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using TCP;
+using System.Collections;
 
 public class CameraController : MonoBehaviour
 {
@@ -8,32 +8,25 @@ public class CameraController : MonoBehaviour
     public float sensitivity = 100f;
     public float clampAngle = 85f;
 
-    private float verticalRotation;
-    private float horizontalRotation;
-
     private void Start()
     {
-        verticalRotation = transform.localEulerAngles.x;
-        horizontalRotation = player.transform.eulerAngles.y;
+        TCPClient.m_Player.PlayerInitRotation(transform.localEulerAngles.x, player.transform.eulerAngles.y);
+        StartCoroutine("Mouse_Movement");
     }
 
     private void Update()
     {
-        //Look();
+       
         Debug.DrawRay(transform.position, transform.forward * 2, Color.red);
+
     }
-
-    private void Look()
+    IEnumerator Mouse_Movement()
     {
-        float _mouseVertical = -Input.GetAxis("Mouse Y");
-        float _mouseHorizontal = Input.GetAxis("Mouse X");
+        while(true)
+        {
+            TCPClient.m_Player.PlayerRotationCheck(Input.GetAxis("Mouse Y"), Input.GetAxis("Mouse X"));
+            yield return new WaitForSeconds(0.1f);
+        }
 
-        verticalRotation += _mouseVertical * sensitivity * Time.deltaTime;
-        horizontalRotation += _mouseHorizontal * sensitivity * Time.deltaTime;
-
-        verticalRotation = Mathf.Clamp(verticalRotation, -clampAngle, clampAngle);
-
-        transform.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
-        player.transform.rotation = Quaternion.Euler(0f, horizontalRotation, 0f);
     }
 }

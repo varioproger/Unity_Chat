@@ -10,6 +10,7 @@ namespace TCP
 {
     public class Packing : TCPSocket
     {
+
         /// <summary>Full Protocol from Server</summary>
         public enum FULL_CODE : UInt64
         {
@@ -96,6 +97,7 @@ namespace TCP
         public AutoResetEvent m_SendEvent;
 
         static public object m_lock;
+        static public object m_Sendlock;
 
         public void Begin()
         {
@@ -103,6 +105,7 @@ namespace TCP
                 Application.Quit();
 
             m_lock = new object();
+            m_Sendlock = new object();
             m_SendEvent = new AutoResetEvent(false);
 
             m_SendBuffer = new Queue<SendBuffer>();
@@ -130,10 +133,15 @@ namespace TCP
         {
             while (true)
             {
-                if (m_SendBuffer.Count == 0)
-                    m_SendEvent.WaitOne();
 
-                Send(m_SendBuffer.Dequeue());
+                if (m_SendBuffer.Count == 0)
+                {
+                    m_SendEvent.WaitOne();
+                }
+                if (m_SendBuffer.Count != 0)
+                {
+                    Send(m_SendBuffer.Dequeue());
+                }
             }
         }
 
@@ -141,39 +149,37 @@ namespace TCP
         {
             while (true)
             {
-                RecvBuffer data = new RecvBuffer();
 
+                RecvBuffer data = new RecvBuffer();
                 try
                 {
-                    data.buffer = new byte[4];
-                    data.size = sizeof(int);
-                    data.offset = 0;
+                        data.buffer = new byte[4];
+                        data.size = sizeof(int);
+                        data.offset = 0;
 
-                    int retval = Recv(data);
-                    data.size = BitConverter.ToInt32(data.buffer, 0);
-                    data.buffer = new byte[data.size];
+                        int retval = Recv(data);
+                        data.size = BitConverter.ToInt32(data.buffer, 0);
+                        data.buffer = new byte[data.size];
 
-                    while (data.size > 0)
-                    {
-                        retval = Recv(data);
-                        if (retval == 0)
-                            break;
+                        while (data.size > 0)
+                        {
+                            retval = Recv(data);
+                            if (retval == 0)
+                                break;
 
-                        data.size -= retval;
-                        data.offset += retval;
-                    }
+                            data.size -= retval;
+                            data.offset += retval;
+                        }
 
-                    data.size = data.offset;
+                        data.size = data.offset;
                 }
                 catch (SocketException e)
                 {
                     print("Socket Error : " + e.Message.ToString());
                     continue;
                 }
-
                 m_RecvBuffer.Enqueue(data);
             }
-
         }
 
         public void PackingData(UInt64 Protocol)

@@ -6,6 +6,7 @@ using UnityEngine;
 public class PlayerState : State
 {
     public int my_id;
+    private bool flag = false;
     void UnPackingData(RecvBuffer buffer, out int id, out Vector3 position, out Quaternion rotation)
     {
 
@@ -172,6 +173,7 @@ public class PlayerState : State
         UInt64 Protocol = (UInt64)CLASS_STATE.PLAYER_STATE | (UInt64)STATE.MOVEMENT | (UInt64)PROTOCOL.INITROTATION;
 
         TCPClient.Instance.PackingData(Protocol, PackingData(verticalRotation, horizontalRotation));
+        flag = true;
     }
     public void PlayerRotationCheck(float Mouse_Y, float Mouse_X)
     {
@@ -182,11 +184,14 @@ public class PlayerState : State
     }
     public void Player_MoveMent(bool[] _inputs, int serial)
     {
-        UInt64 Protocol = (UInt64)CLASS_STATE.PLAYER_STATE | (UInt64)STATE.MOVEMENT | (UInt64)PROTOCOL.POSITION;
-        Debug.Log(string.Format("temp = {0:x}", Protocol));
-        Debug.Log($"TCPClient.Instance.myId = {TCPClient.m_Player.my_id}");
-        Debug.Log($"serial = {serial}");
-        TCPClient.Instance.PackingData(Protocol, PackingData(_inputs, Player_Manager.players[TCPClient.m_Player.my_id].transform.rotation));
+        if(flag)
+        {
+            UInt64 Protocol = (UInt64)CLASS_STATE.PLAYER_STATE | (UInt64)STATE.MOVEMENT | (UInt64)PROTOCOL.POSITION;
+            Debug.Log(string.Format("temp = {0:x}", Protocol));
+            Debug.Log($"TCPClient.Instance.myId = {TCPClient.m_Player.my_id}");
+            Debug.Log($"serial = {serial}");
+            TCPClient.Instance.PackingData(Protocol, PackingData(_inputs, Player_Manager.players[TCPClient.m_Player.my_id].transform.rotation));
+        }
     }
     public bool Player_Init_SendMessage()
     {

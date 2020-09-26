@@ -64,10 +64,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Chat\Chat_Manager.cs" />
-    <Compile Include="Assets\Game_Manager.cs" />
     <Compile Include="Assets\Lobby\Lobby_Manager.cs" />
     <Compile Include="Assets\Login_In\Login.cs" />
     <Compile Include="Assets\Player\CameraController.cs" />
+    <Compile Include="Assets\Player\Game_Manager.cs" />
     <Compile Include="Assets\Player\Player.cs" />
     <Compile Include="Assets\Player\Player_Manager.cs" />
     <Compile Include="Assets\Register\Register_Manager.cs" />

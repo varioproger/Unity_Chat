@@ -16,7 +16,8 @@ namespace TCP
         {
             MAIN = 0xff00000000000000,
             SUB = 0x00ff000000000000,
-            PROTOCOL = 0x0000ff0000000000
+            PROTOCOL =  0x0000ff0000000000,
+            ANIMATION = 0x000000fff0000000,
         };
 
         /// <summary>Sent from server to client.</summary>
@@ -86,6 +87,12 @@ namespace TCP
             ERROR_LOGIN_ID,
             ERROR_LOGIN_PW,
             ERROR_LOGIN_EXISTS
+        };
+
+        public enum ANIMATION : UInt64
+        {
+            IDLE = 0x0000000100000000,
+            RUN =  0x0000000200000000
         };
 
         public Queue<SendBuffer> m_SendBuffer;

@@ -64,10 +64,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Chat\Chat_Manager.cs" />
+    <Compile Include="Assets\Follow.cs" />
     <Compile Include="Assets\Lobby\Lobby_Manager.cs" />
     <Compile Include="Assets\Login_In\Login.cs" />
     <Compile Include="Assets\Player\CameraController.cs" />
     <Compile Include="Assets\Player\Game_Manager.cs" />
+    <Compile Include="Assets\Player\Other_Player.cs" />
     <Compile Include="Assets\Player\Player.cs" />
     <Compile Include="Assets\Player\Player_Manager.cs" />
     <Compile Include="Assets\Register\Register_Manager.cs" />
@@ -80,6 +82,7 @@
     <Compile Include="Assets\TCPScript\State.cs" />
     <Compile Include="Assets\TCPScript\TCPClient.cs" />
     <Compile Include="Assets\TCPScript\TCPSocket.cs" />
+    <Compile Include="Assets\unity_chan_controller.cs" />
     <Compile Include="Assets\unity-chan!\Unity-chan! Model\Scripts\AutoBlink.cs" />
     <Compile Include="Assets\unity-chan!\Unity-chan! Model\Scripts\CameraController.cs" />
     <Compile Include="Assets\unity-chan!\Unity-chan! Model\Scripts\FaceUpdate.cs" />

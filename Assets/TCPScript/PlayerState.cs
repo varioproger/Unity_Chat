@@ -9,8 +9,6 @@ public class PlayerState : State
     private bool flag = false;
     void UnPackingData(RecvBuffer buffer, out int id, out Vector3 position, out Quaternion rotation)
     {
-
-        Debug.Log("UNPACKINHGG");
         RecvBuffer data = buffer;
         data.offset = sizeof(UInt64);
 
@@ -19,66 +17,62 @@ public class PlayerState : State
 
         position.x = BitConverter.ToSingle(data.buffer, data.offset);
         data.offset += sizeof(float);
-        //Debug.Log(position.x);
+
 
         position.y = BitConverter.ToSingle(data.buffer, data.offset);
         data.offset += sizeof(float);
-       // Debug.Log(position.y);
+
 
         position.z = BitConverter.ToSingle(data.buffer, data.offset);
         data.offset += sizeof(float);
-        //Debug.Log(position.z);
+
 
         rotation.w = BitConverter.ToSingle(data.buffer, data.offset);
         data.offset += sizeof(float);
-        //Debug.Log(rotation.w);
+
 
         rotation.x = BitConverter.ToSingle(data.buffer, data.offset);
         data.offset += sizeof(float);
-        //Debug.Log(rotation.x);
+
 
         rotation.y = BitConverter.ToSingle(data.buffer, data.offset);
         data.offset += sizeof(float);
-       // Debug.Log(rotation.y);
+   
 
         rotation.z = BitConverter.ToSingle(data.buffer, data.offset);
-        //Debug.Log(rotation.z);
+
     }
     void UnPackingData(RecvBuffer buffer, out int serial, out Vector3 position)
     {
         RecvBuffer data = buffer;
         data.offset = sizeof(UInt64);
 
-        ////serial
+
         serial = BitConverter.ToInt32(data.buffer, data.offset);
         data.offset += sizeof(int);
-        //Debug.Log(string.Format("temp = {0:x}", serial));
+
 
         position.x = BitConverter.ToSingle(data.buffer, data.offset);
         data.offset += sizeof(float);
-        //Debug.Log(position.x);
+
 
         position.y = BitConverter.ToSingle(data.buffer, data.offset);
         data.offset += sizeof(float);
-        //Debug.Log(position.y);
 
         position.z = BitConverter.ToSingle(data.buffer, data.offset);
         data.offset += sizeof(float);
-        //Debug.Log(position.z);
+
 
        
     }
     void UnPackingData(RecvBuffer buffer, out int serial, out Quaternion rotation)
     {
-
-        Debug.Log("UNPACKINHGG");
         RecvBuffer data = buffer;
         data.offset = sizeof(UInt64);
 
         ////serial
         serial = BitConverter.ToInt32(data.buffer, data.offset);
         data.offset += sizeof(int);
-        Debug.Log(string.Format("temp = {0:x}", serial));
 
         rotation.w = BitConverter.ToSingle(data.buffer, data.offset);
         data.offset += sizeof(float);
@@ -177,7 +171,7 @@ public class PlayerState : State
     }
     public void PlayerRotationCheck(float Mouse_Y, float Mouse_X)
     {
-        Debug.Log("PlayerRotationCheck");
+
         UInt64 Protocol = (UInt64)CLASS_STATE.PLAYER_STATE | (UInt64)STATE.MOVEMENT | (UInt64)PROTOCOL.ROTATION;
 
         TCPClient.Instance.PackingData(Protocol, PackingData(Mouse_Y, Mouse_X));
@@ -187,16 +181,13 @@ public class PlayerState : State
         if(flag)
         {
             UInt64 Protocol = (UInt64)CLASS_STATE.PLAYER_STATE | (UInt64)STATE.MOVEMENT | (UInt64)PROTOCOL.POSITION;
-            Debug.Log(string.Format("temp = {0:x}", Protocol));
-            Debug.Log($"TCPClient.Instance.myId = {TCPClient.m_Player.my_id}");
-            Debug.Log($"serial = {serial}");
+
             TCPClient.Instance.PackingData(Protocol, PackingData(_inputs, Player_Manager.players[TCPClient.m_Player.my_id].transform.rotation));
         }
     }
     public bool Player_Init_SendMessage()
     {
         UInt64 Protocol = (UInt64)CLASS_STATE.PLAYER_STATE | (UInt64)STATE.ONLINE;
-        Debug.Log(string.Format("Player_Init_SendMessage = {0:x}", Protocol));
         TCPClient.Instance.PackingData(Protocol);
         return true;
     }
@@ -215,10 +206,12 @@ public class PlayerState : State
         Player_Manager.players[serial].transform.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
         Player_Manager.players[serial].transform.rotation = Quaternion.Euler(0f, horizontalRotation, 0f);
     }
+
     public override void RecvProcess()
     {
         UInt64 Protocol = TCPClient.Instance.GetProtocol() & (UInt64)FULL_CODE.PROTOCOL;
-        Debug.Log(string.Format("temp = {0:x}", Protocol));
+        UInt64 animation = TCPClient.Instance.GetProtocol() & (UInt64)FULL_CODE.ANIMATION;
+
         int id;
         Vector3 position=Vector3.zero;
         Quaternion rotation = Quaternion.identity ;
@@ -227,23 +220,25 @@ public class PlayerState : State
         switch ((PROTOCOL)Protocol)
         {
             case PROTOCOL.SPAWN:
-                Debug.Log("SPAWN");
                 UnPackingData(TCPClient.Instance.UnPackingData(), out id, out position, out rotation);
-                Debug.Log(string.Format("id = {0:x}", id));
                 Player_Manager.instance.SpawnPlayer(id, position, rotation);
                 break;
             case PROTOCOL.ROTATION:
-                Debug.Log("ROTATION");
                 UnPackingData(TCPClient.Instance.UnPackingData(), out id, out y, out x);
-                Debug.Log(string.Format("serial Rotation = {0:x}", id));
                 PlayerRotation(id, y, x);
                 break;
             case PROTOCOL.POSITION:
-                Debug.Log("POSITION");
-                UnPackingData(TCPClient.Instance.UnPackingData(), out id, out position);
-                Debug.Log(string.Format("serial Position = {0:x}", id));
-                PlayerPosition(id, position);
+                switch ((ANIMATION)animation)
+                {
+                    case ANIMATION.IDLE:
+                        break;
+                    case ANIMATION.RUN:                        
+                        UnPackingData(TCPClient.Instance.UnPackingData(), out id, out position);
+                        PlayerPosition(id, position);
+                        break;
+                }
                 break;            
         }
     }
 }
+//        Debug.Log(string.Format("temp = {0:x}", Protocol));

@@ -6,7 +6,6 @@ public class Player_Manager : MonoBehaviour
 {
     public static Player_Manager instance;
     public static Dictionary<int, Player> players = new Dictionary<int, Player>();
-
     public GameObject localPlayerPrefab;
     public GameObject otherplayerPrefab;
     private void Awake()
@@ -32,14 +31,18 @@ public class Player_Manager : MonoBehaviour
         {
             Debug.Log("SAME");
             _player = Instantiate(localPlayerPrefab, _position, _rotation);
+            //_player.GetComponent<Player>().Serial_N = _id;
+
         }
         else
         {
             Debug.Log("OTHER");
             _player = Instantiate(otherplayerPrefab, _position, _rotation);
+            //_player.GetComponent<Other_Player>().Serial_N = _id;
         }
         _player.GetComponent<Player>().Serial_N = _id;
         players.Add(_id, _player.GetComponent<Player>());
+
     }
 
 }
